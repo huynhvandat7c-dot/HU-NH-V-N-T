@@ -15,8 +15,8 @@
 </head>
 <body>
 
-    <h1>Ứng dụng vẽ đồ thị 3D đầu tiên của tôi</h1>
-    <p>Hàm số: $z = \sin(\sqrt{x^2 + y^2})$ (Dùng chuột để xoay, phóng to/thu nhỏ đồ thị)</p>
+    <h1>Ứng dụng vẽ đồ thị 3D của tôi</h1>
+    <p>Hàm số: $z = \sin(x) \times \cos(y)$ (Dùng chuột để xoay, phóng to/thu nhỏ đồ thị)</p>
     
     <!-- Nơi chứa đồ thị 3D -->
     <div id="plot"></div>
@@ -31,7 +31,15 @@
         for (let i = -5; i <= 5; i += 0.2) {
             x_data.push(i);
             y_data.push(i);
-        
+        }
+
+        // Tính giá trị Z dựa trên công thức hình sóng nhấp nhô
+        for (let i = 0; i < y_data.length; i++) {
+            let row = [];
+            for (let j = 0; j < x_data.length; j++) {
+                let z_val = Math.sin(x_data[j]) * Math.cos(y_data[i]);
+                row.push(z_val);
+            }
             z_data.push(row);
         }
 
@@ -46,7 +54,7 @@
 
         // Cấu hình giao diện hiển thị
         let layout = {
-            title: 'Đồ thị Hàm Số 3D',
+            title: 'Đồ thị Hàm Số 3D Mới',
             autosize: true,
             margin: { l: 0, r: 0, b: 0, t: 50 }
         };
