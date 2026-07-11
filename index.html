@@ -31,15 +31,7 @@
         for (let i = -5; i <= 5; i += 0.2) {
             x_data.push(i);
             y_data.push(i);
-        }
-
-        // Tính giá trị Z dựa trên công thức toán học z = sin(sqrt(x^2 + y^2))
-        for (let i = 0; i < y_data.length; i++) {
-            let row = [];
-            for (let j = 0; j < x_data.length; j++) {
-                let r = Math.sqrt(Math.pow(x_data[j], 2) + Math.pow(y_data[i], 2));
-                row.push(Math.sin(r)); // Công thức hàm số
-            }
+        
             z_data.push(row);
         }
 
