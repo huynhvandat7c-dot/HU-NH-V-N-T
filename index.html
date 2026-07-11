@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Vẽ Đồ Thị Hàm Số 3D</title>
+    <!-- Tải thư viện vẽ đồ thị 3D Plotly -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        #plot { width: 100%; height: 70vh; max-width: 900px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+
+    <h1>Ứng dụng vẽ đồ thị 3D đầu tiên của tôi</h1>
+    <p>Hàm số: $z = \sin(\sqrt{x^2 + y^2})$ (Dùng chuột để xoay, phóng to/thu nhỏ đồ thị)</p>
+    
+    <!-- Nơi chứa đồ thị 3D -->
+    <div id="plot"></div>
+
+    <script>
+        // Tạo dữ liệu tọa độ x, y cho đồ thị
+        let x_data = [];
+        let y_data = [];
+        let z_data = [];
+
+        // Lập trình vòng lặp tạo lưới tọa độ từ -5 đến 5
+        for (let i = -5; i <= 5; i += 0.2) {
+            x_data.push(i);
+            y_data.push(i);
+        }
+
+        // Tính giá trị Z dựa trên công thức toán học z = sin(sqrt(x^2 + y^2))
+        for (let i = 0; i < y_data.length; i++) {
+            let row = [];
+            for (let j = 0; j < x_data.length; j++) {
+                let r = Math.sqrt(Math.pow(x_data[j], 2) + Math.pow(y_data[i], 2));
+                row.push(Math.sin(r)); // Công thức hàm số
+            }
+            z_data.push(row);
+        }
+
+        // Cấu hình kiểu vẽ đồ thị 3D (Surface - Bề mặt)
+        let data = [{
+            z: z_data,
+            x: x_data,
+            y: y_data,
+            type: 'surface',
+            colorscale: 'Viridis' // Màu sắc đồ thị
+        }];
+
+        // Cấu hình giao diện hiển thị
+        let layout = {
+            title: 'Đồ thị Hàm Số 3D',
+            autosize: true,
+            margin: { l: 0, r: 0, b: 0, t: 50 }
+        };
+
+        // Lệnh kích hoạt thư viện vẽ đồ thị vào thẻ <div id="plot">
+        Plotly.newPlot('plot', data, layout);
+    </script>
+</body>
+</html>
