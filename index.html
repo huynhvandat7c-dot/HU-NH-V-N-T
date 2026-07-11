@@ -3,64 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Vẽ Đồ Thị Hàm Số 3D</title>
-    <!-- Tải thư viện vẽ đồ thị 3D Plotly -->
+    <title>Ứng Dụng Vẽ Đồ Thị 3D Tùy Biến</title>
+    <!-- Tải thư viện vẽ đồ thị Plotly và thư viện giải toán Math.js -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #f4f4f9; margin: 0; padding: 20px; }
-        #plot { width: 100%; height: 70vh; max-width: 900px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        p { color: #666; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        h1 { color: #1a73e8; margin-top: 0; }
+        .control-panel { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+        input[type="text"] { padding: 10px; width: 300px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        input[type="text"]:focus { border-color: #1a73e8; }
+        button { padding: 10px 20px; background-color: #1a73e8; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #1557b0; }
+        #plot { width: 100%; height: 65vh; border: 1px solid #eee; border-radius: 8px; }
+        .hint { color: #666; font-size: 14px; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>Ứng dụng vẽ đồ thị 3D của tôi</h1>
-    <p>Hàm số: $z = \sin(x) \times \cos(y)$ (Dùng chuột để xoay, phóng to/thu nhỏ đồ thị)</p>
+<div class="container">
+    <h1>Máy Tính Vẽ Đồ Thị Hàm Số 3D</h1>
     
-    <!-- Nơi chứa đồ thị 3D -->
+    <!-- Thanh điều khiển nhập phương trình -->
+    <div class="control-panel">
+        <label for="equation" style="font-weight: bold;">Nhập z = </label>
+        <input type="text" id="equation" value="sin(sqrt(x^2 + y^2))" placeholder="Ví dụ: x^2 - y^2">
+        <button onclick="drawGraph()">Vẽ Đồ Thị</button>
+    </div>
+    <div class="hint">Các hàm hợp lệ: sin(x), cos(y), x^2, sqrt(x), abs(x), tan(x)... Dùng dấu * để nhân (Ví dụ: x * y)</div>
+    
+    <!-- Nơi hiển thị đồ thị -->
     <div id="plot"></div>
+</div>
 
-    <script>
-        // Tạo dữ liệu tọa độ x, y cho đồ thị
+<script>
+    function drawGraph() {
+        // Lấy phương trình người dùng nhập vào
+        let equationText = document.getElementById('equation').value;
+        
         let x_data = [];
         let y_data = [];
         let z_data = [];
 
-        // Lập trình vòng lặp tạo lưới tọa độ từ -5 đến 5
+        // Tạo dải tọa độ cho hệ trục Ox và Oy từ -5 đến 5
         for (let i = -5; i <= 5; i += 0.2) {
-            x_data.push(i);
-            y_data.push(i);
+            x_data.push(Math.round(i * 10) / 10);
+            y_data.push(Math.round(i * 10) / 10);
         }
 
-// Tính giá trị Z dựa trên công thức hình sóng nhấp nhô
-        for (let i = 0; i < y_data.length; i++) {
-            let row = [];
-            for (let j = 0; j < x_data.length; j++) {
-                let z_val = Math.sin(x_data[j]) * Math.cos(y_data[i]);
-                row.push(z_val);
+        try {
+            // Biên dịch phương trình toán học bằng Math.js
+            const expr = math.compile(equationText);
+
+            // Tính toán ma trận Z dựa trên X và Y
+            for (let i = 0; i < y_data.length; i++) {
+                let row = [];
+                for (let j = 0; j < x_data.length; j++) {
+                    // Truyền giá trị x và y vào phương trình để tính z
+                    let z_val = expr.evaluate({ x: x_data[j], y: y_data[i] });
+                    row.push(z_val);
+                }
+                z_data.push(row);
             }
-            z_data.push(row);
+
+            // Cấu hình hiển thị đồ thị bề mặt 3D
+            let data = [{
+                z: z_data,
+                x: x_data,
+                y: y_data,
+                type: 'surface',
+                colorscale: 'Jet' // Đổi sang bảng màu rực rỡ hơn
+            }];
+
+            // Cấu hình hệ trục tọa độ rõ ràng Ox, Oy, Oz
+            let layout = {
+                title: 'Đồ thị bề mặt tương tác 3D',
+                autosize: true,
+                margin: { l: 0, r: 0, b: 0, t: 40 },
+                scene: {
+                    xaxis: { title: 'Trục Ox', titlefont: {color: 'red'}, gridcolor: '#ddd', showgrid: true },
+                    yaxis: { title: 'Trục Oy', titlefont: {color: 'green'}, gridcolor: '#ddd', showgrid: true },
+                    zaxis: { title: 'Trục Oz', titlefont: {color: 'blue'}, gridcolor: '#ddd', showgrid: true }
+                }
+            };
+
+            // Vẽ đồ thị ra màn hình
+            Plotly.newPlot('plot', data, layout);
+
+        } catch (error) {
+            alert("Phương trình bạn nhập không hợp lệ hoặc sai cú pháp. Vui lòng kiểm tra lại! \nLưu ý: Phải dùng dấu * để nhân, ví dụ: x * y chứ không gõ xy.");
         }
+    }
 
-        // Cấu hình kiểu vẽ đồ thị 3D (Surface - Bề mặt)
-        let data = [{
-            z: z_data,
-            x: x_data,
-            y: y_data,
-            type: 'surface',
-            colorscale: 'Viridis' // Màu sắc đồ thị
-        }];
-
-        // Cấu hình giao diện hiển thị
-        let layout = {
-            title: 'Đồ thị Hàm Số 3D Mới',
-            autosize: true,
-            margin: { l: 0, r: 0, b: 0, t: 50 }
-        };
-
-        // Lệnh kích hoạt thư viện vẽ đồ thị vào thẻ <div id="plot">
-        Plotly.newPlot('plot', data, layout);
-    </script>
+    // Tự động vẽ lần đầu tiên khi trang web vừa tải xong
+    drawGraph();
+</script>
 </body>
 </html>
