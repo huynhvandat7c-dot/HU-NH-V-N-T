@@ -3,100 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồ Thị Toán Học 3D Chuẩn</title>
-    <!-- Tải thư viện vẽ đồ thị chuyên nghiệp Plotly -->
+    <title>Đồ Thị Toán 12 Xoay 3D</title>
+    <!-- Tải thư viện toán và đồ thị -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #f8f9fa; margin: 0; padding: 20px; }
-        .container { max-width: 950px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        #plot { width: 100%; height: 75vh; }
-        .guide { background: #e8f0fe; color: #1a73e8; padding: 10px; border-radius: 5px; font-weight: bold; margin-bottom: 10px; }
+        body { font-family: sans-serif; text-align: center; background-color: #f3f4f6; margin: 0; padding: 20px; }
+        .box { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #2563eb; margin-top: 0; font-size: 24px; }
+        .input-area { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        input { padding: 8px; width: 250px; border: 2px solid #cbd5e1; border-radius: 4px; font-size: 16px; }
+        button { padding: 9px 18px; background-color: #2563eb; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #1d4ed8; }
+        #plot { width: 100%; height: 65vh; }
+        .note { color: #64748b; font-size: 13px; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="guide">🖱️ HƯỚNG DẪN: Nhấn giữ chuột trái và kéo để XOAY đồ thị tự do! Cuộn chuột để phóng to/thu nhỏ.</div>
-    <!-- Nơi chứa đồ thị -->
+<div class="box">
+    <h1>Đồ Thị Hàm Số Toán 12 (Không Gian 3D)</h1>
+    
+    <div class="input-area">
+        <label style="font-weight: bold;">Nhập hàm số y = </label>
+        <!-- Mặc định là hàm bậc 3 lớp 12: x^3 - 3x -->
+        <input type="text" id="equation" value="x^3 - 3*x">
+        <button onclick="drawToan12()">Vẽ Đồ Thị</button>
+        <div class="note">Ví dụ bậc 3: <code>x^3 - 3*x</code> | Hàm trùng phương bậc 4: <code>x^4 - 2*x^2</code></div>
+    </div>
+
+    <!-- Nơi giữ chuột để xoay -->
     <div id="plot"></div>
 </div>
 
 <script>
-    // Tạo lưới tọa độ x, y "bình thường" từ -5 đến 5
-    let x_data = [];
-    let y_data = [];
-    let z_data = [];
+    function drawToan12() {
+        let inputTxt = document.getElementById('equation').value;
+        
+        let x_val = [];
+        let y_val = [];
+        let z_val = []; // Trục Z bằng 0 để giữ đồ thị phẳng ban đầu
 
-    for (let i = -5; i <= 5; i += 0.25) {
-        x_data.push(Math.round(i * 100) / 100);
-        y_data.push(Math.round(i * 100) / 100);
-    }
-
-    // Tính toán ma trận Z dựa trên hàm số: z = sin(x) * cos(y)
-    for (let i = 0; i < y_data.length; i++) {
-        let row = [];
-        for (let j = 0; j < x_data.length; j++) {
-            let z_val = Math.sin(x_data[j]) * Math.cos(y_data[i]);
-            row.push(z_val);
+        // Tạo tập hợp điểm x chạy từ -4 đến 4 để vẽ đường cong mượt
+        for (let x = -4; x <= 4; x += 0.05) {
+            x_val.push(x);
+            z_val.push(0); // Đồ thị nằm trên mặt phẳng Z = 0
         }
-        z_data.push(row);
-    }
 
-    // Cấu hình hiển thị dạng khung lưới toán học kết hợp đổ màu
-    let data = [{
-        z: z_data,
-        x: x_data,
-        y: y_data,
-        type: 'surface',
-        colorscale: 'Viridis',
-        contours: {
-            z: { show: true, usecolormap: true, highlightcolor: "#444", project: {z: true} }
-        },
-        // Thêm các đường lưới caro toán học lên bề mặt đồ thị
-        line: { color: '#111', width: 0.5 } 
-    }];
-
-    // Thiết lập hệ trục Ox, Oy, Oz chuẩn có vạch chia số rõ ràng
-    let layout = {
-        title: 'ĐỒ THỊ HÀM SỐ TOÁN HỌC 3D (TƯƠNG TÁC XOAY)',
-        autosize: true,
-        margin: { l: 0, r: 0, b: 0, t: 50 },
-        scene: {
-            // Cấu hình trục Ox
-            xaxis: { 
-                title: 'Trục Ox', 
-                gridcolor: '#cccccc', // Màu lưới ô ly
-                showbackground: true,
-                backgroundcolor: '#f0f0f0',
-                zerolinecolor: '#ff0000', // Đường số 0 màu đỏ đậm
-                zerolinewidth: 3
-            },
-            // Cấu hình trục Oy
-            yaxis: { 
-                title: 'Trục Oy', 
-                gridcolor: '#cccccc', 
-                showbackground: true,
-                backgroundcolor: '#f0f0f0',
-                zerolinecolor: '#00ff00', // Đường số 0 màu xanh lá đậm
-                zerolinewidth: 3
-            },
-            // Cấu hình trục Oz
-            zaxis: { 
-                title: 'Trục Oz', 
-                gridcolor: '#cccccc',
-                showbackground: true,
-                backgroundcolor: '#e5e5e5',
-                zerolinecolor: '#0000ff', // Đường số 0 màu xanh dương đậm
-                zerolinewidth: 3
-            },
-            camera: {
-                eye: {x: 1.5, y: 1.5, z: 1.2} // Góc nhìn xéo ban đầu để dễ nhìn thấy độ 3D
+        try {
+            // Giải phương trình người dùng nhập
+            const expr = math.compile(inputTxt);
+            
+            // Tính toán giá trị y tương ứng với từng x
+            for (let i = 0; i < x_val.length; i++) {
+                let y = expr.evaluate({ x: x_val[i] });
+                y_val.push(y);
             }
-        }
-    };
 
-    // Vẽ đồ thị
-    Plotly.newPlot('plot', data, layout);
+            // Cấu hình vẽ ĐƯỜNG CONG (Scatter3d) thay vì bề mặt
+            let data = [{
+                x: x_val,
+                y: y_val,
+                z: z_val,
+                type: 'scatter3d',
+                mode: 'lines',
+                line: { color: '#ef4444', width: 5 }, // Đường nét liền màu đỏ đậm giống sách giáo khoa
+                name: 'Đồ thị y(x)'
+            }];
+
+            // Thiết lập hệ trục Oxy ly vuông rõ ràng
+            let layout = {
+                autosize: true,
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                scene: {
+                    // Cấu hình trục Ox
+                    xaxis: { title: 'Trục Ox', gridcolor: '#e2e8f0', zerolinecolor: '#000', zerolinewidth: 2, range: [-4, 4] },
+                    // Cấu hình trục Oy
+                    yaxis: { title: 'Trục Oy', gridcolor: '#e2e8f0', zerolinecolor: '#000', zerolinewidth: 2, range: [-5, 5] },
+                    // Trục Oz phụ để hỗ trợ không gian xoay
+                    zaxis: { title: 'Chiều sâu', gridcolor: '#e2e8f0', range: [-2, 2], showticklabels: false },
+                    camera: {
+                        // Góc nhìn từ trên thẳng xuống (nhìn như đồ thị 2D lớp 12 bình thường)
+                        eye: {x: 0, y: 0, z: 2.5} 
+                    }
+                }
+            };
+
+            Plotly.newPlot('plot', data, layout);
+
+        } catch (e) {
+            alert("Cú pháp hàm số chưa đúng, bạn kiểm tra lại dấu nhân (*) nhé!");
+        }
+    }
+
+    // Chạy lần đầu
+    drawToan12();
 </script>
 </body>
 </html>
